@@ -1,3 +1,12 @@
 body{
-    font-family: 'Roboto', sans-serif;
+    font-family: 'avenir next', 'avenir', sans-serif;
+}
+table {
+    text-align: left;
+}
+th {
+    padding-right: 25px;
+}
+td {
+    padding-right: 5px;
 }

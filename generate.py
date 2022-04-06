@@ -36,6 +36,11 @@ with open(boilerplate_dir + 'scope.md') as f:
 	report_md += page_break
 	f.close()
 
+with open(boilerplate_dir + 'technical-details.md') as f:
+	report_md += f.read()
+	report_md += page_break
+	f.close()
+
 for file in os.listdir(findings_dir):
 	filename = os.fsdecode(file)
 	with open(findings_dir + filename) as f:
@@ -49,8 +54,7 @@ with open(boilerplate_dir + 'conclusion.md') as f:
 	f.close()
 
 # Render Markdown: Convert to main report to HTML
-print(report_md)
-report_html = markdown.markdown(report_md, extensions=['codehilite'])
+report_html = markdown.markdown(report_md, extensions=['codehilite', 'tables'])
 
 # Insert Placeolders
 report_md = report_md.format(title = config["title"], author = config["author"])
