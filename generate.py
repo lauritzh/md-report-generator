@@ -41,6 +41,9 @@ with open(boilerplate_dir + 'technical-details.md') as f:
 	report_md += page_break
 	f.close()
 
+# Insert Placeolders
+report_md = report_md.format(title = config["title"], author = config["author"], customer = config["customer"])
+
 for file in os.listdir(findings_dir):
 	filename = os.fsdecode(file)
 	with open(findings_dir + filename) as f:
@@ -54,14 +57,11 @@ with open(boilerplate_dir + 'conclusion.md') as f:
 	f.close()
 
 # Render Markdown: Convert to main report to HTML
-report_html = markdown.markdown(report_md, extensions=['codehilite', 'tables'])
-
-# Insert Placeolders
-report_md = report_md.format(title = config["title"], author = config["author"])
+report_html = markdown.markdown(report_md, extensions=['fenced_code', 'codehilite', 'tables'])
 
 cover_location = "temp/cover_processed.html"
 with open(boilerplate_dir + 'cover.html') as f:
-	cover_processed = Template(f.read()).safe_substitute(title=config["title"], author=config["author"], date=datetime.datetime.now().strftime("%Y-%m-%d"))
+	cover_processed = Template(f.read()).safe_substitute(title=config["title"], author=config["author"], date=datetime.datetime.now().strftime("%Y-%m-%d"), customer=config["customer"])
 	f.close()
 
 with open(cover_location, 'w') as f:
@@ -75,15 +75,19 @@ toc = {
 
 options = {
 	'--header-html': boilerplate_dir + 'header.html',
-	'margin-bottom': '0.75cm', 
     '--footer-html': boilerplate_dir + 'footer.html',
-	'footer-right': '[page] of [topage]',
+	#'footer-right': '[page] of [topage]',
+	'footer-right': '[page]',
+	'footer-font-name': 'avenir next',
+	'margin-bottom': '0.75cm', 
+	'margin-top': '1.5cm',
+	'header-spacing': '-5',
 	'encoding': "UTF-8",
 	'page-size': 'A4',
-	'margin-top': '1.5cm',
 }
 
 css = boilerplate_dir + "report.css"
 
 pdfkit.from_string(report_html, 'report.pdf', options=options, css=css, toc=toc, cover=cover_location, cover_first=True)
 #pdfkit.from_string(report_html, 'report.pdf')
+#print(report_html)

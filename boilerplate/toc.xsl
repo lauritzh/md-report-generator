@@ -4,8 +4,7 @@
                 xmlns:outline="http://wkhtmltopdf.org/outline"
                 xmlns="http://www.w3.org/1999/xhtml">
     <xsl:output doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
-                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitiona
-l.dtd"
+                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
                 indent="yes" />
     <xsl:template match="outline:outline">
         <html>
@@ -17,21 +16,37 @@ l.dtd"
                         font-family: 'Roboto', sans-serif;
                     }
                     h1 {
-                    text-align: center;
-                    font-size: 20px;
-                    font-family: arial;
+                        font-size: 20px;
+                        font-family: 'avenir next', 'avenir', sans-serif;
+                        margin-bottom: 30px;
                     }
-                    div {border-bottom: 1px dashed rgb(200,200,200);}
-                    span {float: right;}
-                    li {list-style: none;}
+                    div {
+                        border-bottom: 1px dashed rgb(200,200,200);
+                    }
+                    span {
+                        float: right;
+                    }
+                    li {
+                        list-style: none;
+                    }
                     ul {
-                    font-size: 20px;
-                    font-family: arial;
+                        font-size: 20px;
+                        font-family: 'avenir next', 'avenir', sans-serif;
+                        margin-bottom: 10px;
                     }
-                    ul ul {font-size: 80%; }
-                    ul {padding-left: 0em;}
-                    ul ul {padding-left: 1em;}
-                    a {text-decoration:none; color: black;}
+                    ul ul {
+                        font-size: 80%; 
+                        margin-top: 8px;
+                    }
+                    ul {
+                        padding-left: 0em;
+                    }
+                    ul ul {
+                        padding-left: 1em;
+                    }
+                    a {
+                        text-decoration:none; color: black;
+                    }
                 </style>
             </head>
             <body>

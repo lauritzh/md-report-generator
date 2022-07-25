@@ -22,7 +22,7 @@ Lorem Ipsum dolor sit amet
 **Project Team**    
 
 * **Lauritz Holtmann**
-* customer@lauritz-holtmann.de
+* pentest@lauritz-holtmann.de
 
 ---
 
