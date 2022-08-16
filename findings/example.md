@@ -1,14 +1,19 @@
-### \#PEN0001: XSS in Test Shop
-
+<!--
+title: XSS in Test Shop
+asset: Test Shop
+CWE-ID: CWE-79
+CWE-Link: https://cwe.mitre.org/data/definitions/79.html
+cvss:
+    AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
+    AC: L # Attack Complexity: Low (L), High (H)
+    PR: N # Privileges Required: None (N), Low (L), High (H)
+    UI: R # User Interaction: None (N), Required (R)
+    S: U # Unchanged (U), Changed (C)
+    C: H # Confidentiality: High (H), Low (L), None (N)
+    I: L # Integrity: High (H), Low (L), None (N)
+    A: N # Availability: High (H), Low (L), None (N)
+-->
 A *Cross-Site Scripting* vulnerability has been identified.
-
----
-
-| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vektor                                                                             |
-|---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
-| Test Shop | [CWE-79](https://cwe.mitre.org/data/definitions/79.html) | High (8.1)                      | [CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N](CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N) |
-
----
 
 This type of vulnerability arises, if an application uses user-controlled inputs to generate dynamic outputs in an insecure manner.
 
@@ -26,3 +31,10 @@ function demo() {
     alert(1);
 }
 ```
+
+#### Fix
+It is recommended to consider all input to the application as potentially dangerous. If user-controlled contents are embedded within the application, they need to be encoded and/or filtered in a *context aware* manner. If the contents are for instance reflected within the JavaScript Context, a different encoding and sanitization needs to be performed than for the HTML context.
+Further guidance can be found within OWASP's [*Cross Site Scripting Prevention Cheat Sheet*](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
+
+#### References
+* [OWASP: Cross-Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/)
