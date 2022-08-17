@@ -33,7 +33,7 @@ $ ls content
 conclusion.md		introduction.md		scope.md		technical-details.md
 ```
 
-To add a new finding, copy an example file from `findings/` and adjust its contents. Each file contains basic meta data as HTML comment (YAML fromat) followed by the main contents of the finding:
+To add a new finding, copy an example file from `findings/` and adjust its contents. Each file contains basic meta data as HTML comment (YAML format) followed by the main contents of the finding:
 ```html
 <!--
 title: Example Vuln 
