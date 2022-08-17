@@ -2,3 +2,4 @@ pyyaml
 markdown
 pdfkit
 cvss
+pygments
