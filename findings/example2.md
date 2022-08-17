@@ -13,6 +13,7 @@ cvss:
     I: H # Integrity: High (H), Low (L), None (N)
     A: N # Availability: High (H), Low (L), None (N)
 -->
+#### Description
 This type of vulnerability arises, if an application processes XML and is configured to support external entities.
 
 Exemplary Payload:    
@@ -24,7 +25,7 @@ Exemplary Payload:
 </example>
 ```
 
-#### Fix
+#### Recommendation
 It is recommended to completely disable external entities (DTDs). Further guidance can be found in OWASP's [*XML External Entity Prevention Cheat Sheet*](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html).
 
 #### References

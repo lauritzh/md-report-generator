@@ -13,8 +13,9 @@ from datetime import date
 from string import Template
 
 # Constants
-boilerplate_dir = "boilerplate/"
+content_dir = "content/"
 findings_dir = "findings/"
+boilerplate_dir = "boilerplate/"
 page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>'
 
 # Variables
@@ -29,17 +30,17 @@ with open('config.yaml') as f:
 
 
 # Glue: Collect files and build Markdown report
-with open(boilerplate_dir + 'introduction.md') as f:
+with open(content_dir + 'introduction.md') as f:
 	report_md += f.read()
 	report_md += page_break
 	f.close()
 
-with open(boilerplate_dir + 'scope.md') as f:
+with open(content_dir + 'scope.md') as f:
 	report_md += f.read()
 	report_md += page_break
 	f.close()
 
-with open(boilerplate_dir + 'technical-details.md') as f:
+with open(content_dir + 'technical-details.md') as f:
 	report_md += f.read()
 	report_md += page_break
 	f.close()
@@ -119,7 +120,7 @@ for counter,finding in enumerate(findings):
 
 
 # Append Conclusion
-with open(boilerplate_dir + 'conclusion.md') as f:
+with open(content_dir + 'conclusion.md') as f:
 	report_md += f.read() 
 	report_md += page_break
 	f.close()

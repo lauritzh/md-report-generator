@@ -13,6 +13,7 @@ cvss:
     I: L # Integrity: High (H), Low (L), None (N)
     A: N # Availability: High (H), Low (L), None (N)
 -->
+#### Description
 A *Cross-Site Scripting* vulnerability has been identified.
 
 This type of vulnerability arises, if an application uses user-controlled inputs to generate dynamic outputs in an insecure manner.
@@ -32,7 +33,7 @@ function demo() {
 }
 ```
 
-#### Fix
+#### Recommendation
 It is recommended to consider all input to the application as potentially dangerous. If user-controlled contents are embedded within the application, they need to be encoded and/or filtered in a *context aware* manner. If the contents are for instance reflected within the JavaScript Context, a different encoding and sanitization needs to be performed than for the HTML context.
 Further guidance can be found within OWASP's [*Cross Site Scripting Prevention Cheat Sheet*](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
 
