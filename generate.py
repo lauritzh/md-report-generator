@@ -22,6 +22,11 @@ page_break = '\n\n<div style = "display:block; clear:both; page-break-after:alwa
 config = {}
 report_md = ""
 
+# Set Base-URL to current working directory 
+# Makes including images to report more easy by simply referencing images/test.png
+report_md += "<base href=\"file://{}/\">".format(os.getcwd())
+
+
 # Parse Config
 with open('config.yaml') as f:
 	config = yaml.load(f, Loader=yaml.FullLoader)
