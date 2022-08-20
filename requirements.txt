@@ -3,3 +3,4 @@ markdown
 pdfkit
 cvss
 pygments
+xlsxwriter

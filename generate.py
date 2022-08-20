@@ -8,6 +8,7 @@ import yaml
 import pdfkit
 import datetime
 import markdown
+import xlsxwriter
 from cvss import CVSS3
 from datetime import date
 from string import Template
@@ -135,6 +136,38 @@ with open(content_dir + 'conclusion.md') as f:
 
 ############
 
+# Write findings to Excel file
+print("Generating Excel file...")
+excel_report = xlsxwriter.Workbook('report.xlsx')
+excel_report_sheet = excel_report.add_worksheet("Findings")
+bold = excel_report.add_format({'bold': True})
+table_header = excel_report.add_format({'bold': True, 'bg_color': '#c8c8cf'})
+
+# Title
+excel_report_sheet.write(0, 0, "Pentest Report: {}".format(config["title"]), bold)
+excel_report_sheet.write(1, 0, "Author: {}".format(config["author"]))
+excel_report_sheet.write(2, 0, "Date: {}".format(datetime.datetime.now().strftime("%Y-%m-%d")))
+
+# Table Header
+excel_report_sheet.write(4, 0, "Finding-ID", table_header)
+excel_report_sheet.write(4, 1, "Severity", table_header)
+excel_report_sheet.write(4, 2, "Asset", table_header)
+excel_report_sheet.write(4, 3, "Title", table_header)
+
+# Findings
+row = 5
+col = 0 
+for counter,finding in enumerate(findings):
+    excel_report_sheet.write(row, col, "#PEN{}{:04d}".format(date.today().year,counter+1), bold)
+    excel_report_sheet.write(row, col + 1, "{} ({})".format(finding["cvss_severity"], finding["cvss_score"]))
+    excel_report_sheet.write(row, col + 2, finding["asset"])
+    excel_report_sheet.write(row, col + 3, finding["title"])
+    row += 1
+ 
+excel_report.close()
+
+############
+print("Render Markdown...")
 # Render Markdown: Convert to main report to HTML
 report_html = markdown.markdown(report_md, extensions=['fenced_code', 'codehilite', 'tables'])
 
