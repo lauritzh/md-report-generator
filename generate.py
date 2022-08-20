@@ -25,7 +25,7 @@ report_md = ""
 
 # Set Base-URL to current working directory 
 # Makes including images to report more easy by simply referencing images/test.png
-report_md += "<base href=\"file://{}/\">".format(os.getcwd())
+report_md += "<base href=\"file://{}/\">\n\n".format(os.getcwd())
 
 
 # Parse Config
