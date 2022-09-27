@@ -128,11 +128,17 @@ for counter,finding in enumerate(findings):
 	report_md += page_break
 
 
-# Append Conclusion
+# Append Conclusion and Appendix
 with open(content_dir + 'conclusion.md') as f:
 	report_md += f.read() 
 	report_md += page_break
 	f.close()
+
+with open(content_dir + 'appendix.md') as f:
+	report_md += f.read() 
+	report_md += page_break
+	f.close()
+
 
 ############
 
