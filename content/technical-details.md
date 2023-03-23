@@ -2,8 +2,8 @@
 
 In this section, all identified vulnerabilities are described in detail.
 
-During the pentest, *12* findings with *high* severity, *3* findings with *medium* severity and one finding with informational severity were identified.
+During the pentest, {critical_findings} finding(s) with *critical* severity, {high_findings} finding(s) with *high* severity, {medium_findings} finding(s) with *medium* severity and {low_findings} finding(s) with *low* severity were identified.
 
-* **High**: Example
-* **Informational**: Lorem
-* **Informational**: Ipsum
+{piechart}
+
+{findings_list}

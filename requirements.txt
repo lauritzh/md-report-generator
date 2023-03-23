@@ -4,3 +4,4 @@ pdfkit
 cvss
 pygments
 xlsxwriter
+matplotlib

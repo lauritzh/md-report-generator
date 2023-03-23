@@ -1,7 +1,8 @@
 #
-# Lauritz Holtmann, (c) 2022
+# Lauritz Holtmann, (c) 2022 - 2023
 #
 
+import io
 import os
 import re
 import yaml
@@ -9,6 +10,7 @@ import pdfkit
 import datetime
 import markdown
 import xlsxwriter
+import matplotlib.pyplot as plt
 from cvss import CVSS3
 from datetime import date
 from string import Template
@@ -17,7 +19,7 @@ from string import Template
 content_dir = "content/"
 findings_dir = "findings/"
 boilerplate_dir = "boilerplate/"
-page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>'
+page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>\n\n'
 
 # Variables
 config = {}
@@ -52,7 +54,17 @@ with open(content_dir + 'technical-details.md') as f:
 	f.close()
 
 # Insert Placeholders
-report_md = report_md.format(title = config["title"], author = config["author"], customer = config["customer"])
+report_md = report_md.format(
+	title = config["title"], 
+	author = config["author"], 
+	customer = config["customer"],
+	critical_findings = "{critical_findings}",
+	high_findings = "{high_findings}",
+	medium_findings = "{medium_findings}",
+	low_findings = "{low_findings}",
+	piechart = "{piechart}",
+	findings_list = "{findings_list}"
+)
 
 ######## Main Part of the Report: Detailed Description of Findings
 
@@ -93,13 +105,62 @@ for file in os.listdir(findings_dir):
 	else:
 		print("File {} does not have correct file type .md".format(file))
 
+
 # Sort findings, CVSS Score descending
 def useScore(elem):
     return elem["cvss_score"]
 findings.sort(key=useScore,reverse=True)
 
+# Determine Statistics and Render Pie Chart
+print("Generating Pie Chart...")
+
+total_findings = len(findings)
+critical_findings = len([finding for finding in findings if finding["cvss_severity"] == "Critical"])
+high_findings = len([finding for finding in findings if finding["cvss_severity"] == "High"])
+medium_findings = len([finding for finding in findings if finding["cvss_severity"] == "Medium"])
+low_findings = len([finding for finding in findings if finding["cvss_severity"] == "Low"])
+none_findings = len([finding for finding in findings if finding["cvss_severity"] == "None"])
+
+## Data for the pie chart
+labels = ['Critical', 'High', 'Medium', 'Low', 'None']
+sizes = [critical_findings, high_findings, medium_findings, low_findings, none_findings]
+colors = ['violet', 'red', 'orange', 'yellow', 'green']
+
+## Set font size and padding for legend
+plt.rcParams['font.size'] = 12
+plt.rcParams['legend.fontsize'] = 12
+
+## Create the pie chart as an SVG in memory
+fig, ax = plt.subplots()
+ax.pie(sizes, labels=None, colors=colors, autopct=lambda pct: f"{pct:.1f}%" if pct > 0 else '')
+ax.axis('equal')
+### Set legend
+plt.subplots_adjust(left=0.1, right=0.5)
+ax.legend(labels, loc='center left', bbox_to_anchor=(1, 0.5), title='Distribution of Findings by Severity')
+svg_io = io.BytesIO()
+plt.savefig(svg_io, format='svg')
+svg_io.seek(0)
+generated_piechart = svg_io.getvalue().decode('utf-8')
+
+## Create the detailed table of findings
+generated_table_of_findings = ""
+for counter,finding in enumerate(findings):
+	# Fill Template
+	generated_table_of_findings += "* **{}**\t\#PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
+
+# Insert Placeholders
+report_md = report_md.format(
+	critical_findings = critical_findings,
+	high_findings = high_findings,
+	medium_findings = medium_findings,
+	low_findings = low_findings,
+	piechart = "{piechart}",
+	findings_list = generated_table_of_findings
+)
+
 # Append processed findings to report
 for counter,finding in enumerate(findings):
+	print("Appending finding {}...".format(finding["title"]))
 	# Fill Template
 	report_md += """
 ### \#PEN{}{:04d}: {}
@@ -113,6 +174,7 @@ for counter,finding in enumerate(findings):
 ---
 
 {}
+
 	""".format(
 		date.today().year,
 		counter+1,
@@ -173,7 +235,7 @@ for counter,finding in enumerate(findings):
 excel_report.close()
 
 ############
-print("Render Markdown...")
+print("Render Markdown to HTML...")
 # Render Markdown: Convert to main report to HTML
 report_html = markdown.markdown(report_md, extensions=['fenced_code', 'codehilite', 'tables'])
 
@@ -185,6 +247,9 @@ with open(boilerplate_dir + 'cover.html') as f:
 with open(cover_location, 'w') as f:
 	f.write(cover_processed)
 	f.close()
+
+# Insert inlined SVG
+report_html = report_html.replace("{piechart}", generated_piechart)
 
 # Generate PDF
 toc = {
@@ -207,4 +272,5 @@ options = {
 
 css = boilerplate_dir + "report.css"
 
+print("Generating PDF...")
 pdfkit.from_string(report_html, 'report.pdf', options=options, css=css, toc=toc, cover=cover_location, cover_first=True)
