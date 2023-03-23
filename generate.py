@@ -294,6 +294,20 @@ def generate_pdf_report():
 
 
 if __name__ == '__main__':
+# TODO: Add argument parser
+# Arguments:
+# --all
+# --pdf-from-html
+# --pdf-from-md
+# --html-from-md
+# --md
+#
+# 	parser = argparse.ArgumentParser(description='Render a pentest report.')
+#	parser.add_argument('--sum', dest='accumulate', action='store_const',
+#						const=sum, default=max,
+#						help='sum the integers (default: find the max)')
+#	args = parser.parse_args()
+#	print(args.accumulate(args.integers))
 	init()
 	generate_report()
 	generate_excel_report()

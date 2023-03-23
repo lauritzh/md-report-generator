@@ -12,13 +12,8 @@
                 <title>Table of Contents</title>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
                 <style>
-                    body{
-                        font-family: 'Roboto', sans-serif;
-                    }
-                    h1 {
-                        font-size: 20px;
+                    body {
                         font-family: 'avenir next', 'avenir', sans-serif;
-                        margin-bottom: 30px;
                     }
                     div {
                         border-bottom: 1px dashed rgb(200,200,200);
@@ -31,18 +26,16 @@
                     }
                     ul {
                         font-size: 20px;
-                        font-family: 'avenir next', 'avenir', sans-serif;
                         margin-bottom: 10px;
-                    }
-                    ul ul {
-                        font-size: 80%; 
-                        margin-top: 8px;
-                    }
-                    ul {
                         padding-left: 0em;
                     }
                     ul ul {
                         padding-left: 1em;
+                        font-size: 80%; 
+                        margin-top: 8px;
+                    }
+                    ul ul ul {
+                        display: none;
                     }
                     a {
                         text-decoration:none; color: black;

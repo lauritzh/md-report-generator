@@ -53,3 +53,11 @@ cvss:
 Lorem Ipsum dolor sit amet...
 [...]
 ```
+
+## Upcoming Features
+- [ ] Use constant finding IDs
+- [ ] Add argument parser
+- [ ] Add support for compiling from intermediate files (save Markdown and HTML files during generation)
+
+## License
+This repository is licensed under the [Unlicense](LICENSE).
