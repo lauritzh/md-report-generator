@@ -162,7 +162,7 @@ def generate_markdown_report():
 	generated_table_of_findings = ""
 	for counter,finding in enumerate(findings):
 		# Fill Template
-		generated_table_of_findings += "* **{}**\t\#PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
+		generated_table_of_findings += "* <b style='display:inline-block;width:70px'>{}</b> \#PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
 
 	# Insert Placeholders
 	report_md = report_md.format(
