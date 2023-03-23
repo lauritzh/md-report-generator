@@ -33,7 +33,7 @@ function demo() {
 }
 ```
 
-![Proof](images/xss.png)
+<img src="images/xss.png" style="width: 75%;">
 
 #### Recommendation
 It is recommended to consider all input to the application as potentially dangerous. If user-controlled contents are embedded within the application, they need to be encoded and/or filtered in a *context aware* manner. If the contents are for instance reflected within the JavaScript Context, a different encoding and sanitization needs to be performed than for the HTML context.

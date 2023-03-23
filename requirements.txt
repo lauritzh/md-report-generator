@@ -5,3 +5,4 @@ cvss
 pygments
 xlsxwriter
 matplotlib
+argparse
