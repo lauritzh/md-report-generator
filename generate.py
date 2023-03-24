@@ -83,59 +83,11 @@ def generate_markdown_report():
 		findings_list = "{findings_list}"
 	)
 
-	######## Main Part of the Report: Detailed Description of Findings
-
-	# Iterate over finding MD files, preprocess
-	for file in os.listdir(findings_dir):
-		if file.endswith(".md"):
-			filename = os.fsdecode(file)
-			with open(findings_dir + filename) as f:
-				print("Processing finding {}...".format(filename))
-				finding = {}
-
-				# Map finding description from MD file
-				finding["description"] = f.read()
-				f.close()
-
-				# Parse Properties from Header Section
-				re_search = re.search(r"<!--[\r\n]([\s\S]*)[\r\n]-->", finding["description"])
-				properties_yaml = re_search.group(1)
-				properties = yaml.load(properties_yaml, Loader=yaml.FullLoader)
-				# Cleanup: Remove properties
-				finding["description"] = finding["description"].replace(re_search.group(0), "")
-
-				# Map Properties
-				finding["title"] = properties["title"]
-				finding["asset"] = properties["asset"]
-				finding["CWE-ID"] = properties["CWE-ID"]
-				finding["CWE-Link"] = properties["CWE-Link"]
-
-				# calculate CVSS score and severity
-				cvss_vector = "CVSS:3.0/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
-				c = CVSS3(cvss_vector)
-				finding["cvss_vector"] = c.clean_vector()
-				finding["cvss_score"] = c.scores()[0]
-				finding["cvss_severity"] = c.severities()[0]
-
-				findings.append(finding)
-		else:
-			print("File {} does not have correct file type .md".format(file))
-
-
-	# Sort findings, CVSS Score descending
-	def useScore(elem):
-		return elem["cvss_score"]
-	findings.sort(key=useScore,reverse=True)
+	# Process Findings
+	process_findings()
 
 	# Determine Statistics and Render Pie Chart
 	print("Generating Pie Chart...")
-
-	total_findings = len(findings)
-	critical_findings = len([finding for finding in findings if finding["cvss_severity"] == "Critical"])
-	high_findings = len([finding for finding in findings if finding["cvss_severity"] == "High"])
-	medium_findings = len([finding for finding in findings if finding["cvss_severity"] == "Medium"])
-	low_findings = len([finding for finding in findings if finding["cvss_severity"] == "Low"])
-	none_findings = len([finding for finding in findings if finding["cvss_severity"] == "None"])
 
 	## Data for the pie chart
 	labels = ['Critical', 'High', 'Medium', 'Low', 'None']
@@ -232,6 +184,57 @@ def generate_markdown_report():
 	# Insert inlined SVG
 	report_html = report_html.replace("{piechart}", generated_piechart)
 
+def process_findings():
+	global config, findings, findings_dir, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings
+
+	# Iterate over finding MD files, preprocess
+	for file in os.listdir(findings_dir):
+		if file.endswith(".md"):
+			filename = os.fsdecode(file)
+			with open(findings_dir + filename) as f:
+				print("Processing finding {}...".format(filename))
+				finding = {}
+
+				# Map finding description from MD file
+				finding["description"] = f.read()
+				f.close()
+
+				# Parse Properties from Header Section
+				re_search = re.search(r"<!--[\r\n]([\s\S]*)[\r\n]-->", finding["description"])
+				properties_yaml = re_search.group(1)
+				properties = yaml.load(properties_yaml, Loader=yaml.FullLoader)
+				# Cleanup: Remove properties
+				finding["description"] = finding["description"].replace(re_search.group(0), "")
+
+				# Map Properties
+				finding["title"] = properties["title"]
+				finding["asset"] = properties["asset"]
+				finding["CWE-ID"] = properties["CWE-ID"]
+				finding["CWE-Link"] = properties["CWE-Link"]
+
+				# calculate CVSS score and severity
+				cvss_vector = "CVSS:3.0/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
+				c = CVSS3(cvss_vector)
+				finding["cvss_vector"] = c.clean_vector()
+				finding["cvss_score"] = c.scores()[0]
+				finding["cvss_severity"] = c.severities()[0]
+
+				findings.append(finding)
+		else:
+			print("File {} does not have correct file type .md".format(file))
+
+	# Sort findings, CVSS Score descending
+	def useScore(elem):
+		return elem["cvss_score"]
+	findings.sort(key=useScore,reverse=True)
+
+	total_findings = len(findings)
+	critical_findings = len([finding for finding in findings if finding["cvss_severity"] == "Critical"])
+	high_findings = len([finding for finding in findings if finding["cvss_severity"] == "High"])
+	medium_findings = len([finding for finding in findings if finding["cvss_severity"] == "Medium"])
+	low_findings = len([finding for finding in findings if finding["cvss_severity"] == "Low"])
+	none_findings = len([finding for finding in findings if finding["cvss_severity"] == "None"])
+
 
 def generate_excel_report():
 	global config, findings
@@ -293,21 +296,28 @@ def generate_pdf_report():
 	pdfkit.from_string(report_html, 'report.pdf', options=options, css=css, toc=toc, cover=cover_location, cover_first=True)
 
 
+def all():
+	generate_report()
+	generate_excel_report()
+
+
 if __name__ == '__main__':
+	init()
+	all()
+
 # TODO: Add argument parser
 # Arguments:
 # --all
+# --findings
 # --pdf-from-html
 # --pdf-from-md
 # --html-from-md
 # --md
-#
-# 	parser = argparse.ArgumentParser(description='Render a pentest report.')
+# --excel
 #	parser.add_argument('--sum', dest='accumulate', action='store_const',
 #						const=sum, default=max,
 #						help='sum the integers (default: find the max)')
 #	args = parser.parse_args()
 #	print(args.accumulate(args.integers))
-	init()
-	generate_report()
-	generate_excel_report()
+
+
