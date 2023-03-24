@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+#
+# A simple, self-contained report generator for penetration testing reports.
 #
 # Lauritz Holtmann, (c) 2022 - 2023
 #
@@ -5,6 +8,7 @@
 import io
 import os
 import re
+import sys
 import yaml
 import pdfkit
 import argparse
@@ -22,7 +26,7 @@ findings_dir = "findings/"
 boilerplate_dir = "boilerplate/"
 page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>\n\n'
 
-# Variables
+# Global Variables
 config = {}
 findings = []
 report_md = ""
@@ -135,7 +139,7 @@ def generate_markdown_report():
 
 ---
 
-| Asset         | CWE                                                      | Severity (CVSS v3.0 Base Score) | CVSS v3.0 Vektor                                                                             |
+| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vektor                                                                             |
 |---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
 | {} | [{}]({}) | {} ({})                      | *{}* |
 
@@ -213,7 +217,7 @@ def process_findings():
 				finding["CWE-Link"] = properties["CWE-Link"]
 
 				# calculate CVSS score and severity
-				cvss_vector = "CVSS:3.0/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
+				cvss_vector = "CVSS:3.1/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
 				c = CVSS3(cvss_vector)
 				finding["cvss_vector"] = c.clean_vector()
 				finding["cvss_score"] = c.scores()[0]
@@ -301,23 +305,42 @@ def all():
 	generate_excel_report()
 
 
+def print_findings():
+	global config, findings, findings_dir, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings
+
+	print("Processed {} findings:".format(total_findings))
+	print("Critical: {}".format(critical_findings))
+	print("High: {}".format(high_findings))
+	print("Medium: {}".format(medium_findings))
+	print("Low: {}".format(low_findings))
+	print("None: {}".format(none_findings))
+
+	print("Findings:")
+	for finding in findings:
+		print("++++++++++++")
+		print("Title: {}".format(finding["title"]))
+		print("Asset: {}".format(finding["asset"]))
+		print("Severity: {}".format(finding["cvss_severity"]))
+		print("CVSS Score: {}".format(finding["cvss_score"]))
+		print("")
+
+################################################
+
 if __name__ == '__main__':
 	init()
-	all()
 
-# TODO: Add argument parser
-# Arguments:
-# --all
-# --findings
-# --pdf-from-html
-# --pdf-from-md
-# --html-from-md
-# --md
-# --excel
-#	parser.add_argument('--sum', dest='accumulate', action='store_const',
-#						const=sum, default=max,
-#						help='sum the integers (default: find the max)')
-#	args = parser.parse_args()
-#	print(args.accumulate(args.integers))
+	# Parse arguments
+	parser = argparse.ArgumentParser(description='Render a pentest report.')
+	parser.add_argument('--all', default=False, action='store_true', help='Generate all reports from scratch.')
+	parser.add_argument('--findings', default=False, action='store_true', help='Print all findings.')
+	if len(sys.argv) == 1:
+		parser.print_help(sys.stderr)
+		sys.exit(1)
+	args = parser.parse_args()
 
-
+	if args.all:
+		all()
+	
+	if args.findings:
+		process_findings()
+		print_findings()

@@ -14,7 +14,7 @@ $ pip3 install -r requirements.txt
 
 Run generation script:
 ```console
-$  python3 generate.py 
+$  python3 generate.py --all
 ```
 
 ## How-to
@@ -55,8 +55,8 @@ Lorem Ipsum dolor sit amet...
 ```
 
 ## Upcoming Features
+- [x] Add argument parser
 - [ ] Use constant finding IDs
-- [ ] Add argument parser
 - [ ] Add support for compiling from intermediate files (save Markdown and HTML files during generation)
 
 ## License
