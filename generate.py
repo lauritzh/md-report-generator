@@ -224,6 +224,8 @@ def process_findings():
 				finding["asset"] = properties["asset"]
 				finding["CWE-ID"] = properties["CWE-ID"]
 				finding["CWE-Link"] = properties["CWE-Link"]
+				if "finding_id" in properties:
+					finding["finding_id"] = properties["finding_id"]
 
 				# calculate CVSS score and severity
 				cvss_vector = "CVSS:3.1/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
@@ -343,10 +345,14 @@ def generate_findings_reports():
 	global config, findings
 
 	for counter,finding in enumerate(findings):
-		print("Generating report for finding #PEN{}{:04d}...".format(date.today().year,counter+1))
-		finding_markdown_temp = finding_markdown(finding)
+		if "finding_id" in finding:
+			finding_id = finding["finding_id"]
+		else:
+			finding_id = "PEN{}{:04d}".format(date.today().year,counter+1)
+		print("Generating report for finding #{}...".format(finding_id))
+		finding_markdown_temp = finding_markdown(finding, finding_id)
 		finding_html = markdown.markdown(finding_markdown_temp, extensions=['fenced_code', 'codehilite', 'tables'])
-		generate_pdf_report(finding_html, mode = "findings", filename = "finding_PEN{}{:04d}.pdf".format(date.today().year,counter+1))
+		generate_pdf_report(finding_html, mode = "findings", filename = "finding_{}.pdf".format(finding_id))
 
 ################################################
 

@@ -3,6 +3,7 @@ title: Open Redirect in Test Shop
 asset: Test Shop
 CWE-ID: CWE-601
 CWE-Link: https://cwe.mitre.org/data/definitions/601.html
+finding_id: PEN-TEST-0003
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: H # Attack Complexity: Low (L), High (H)
