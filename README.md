@@ -56,6 +56,7 @@ Lorem Ipsum dolor sit amet...
 
 ## Upcoming Features
 - [x] Add argument parser
+- [x] Optional: Separate PDF files for findings (e.g. useful to share preliminary results with customer)
 - [ ] Use constant finding IDs
 - [ ] Add support for compiling from intermediate files (save Markdown and HTML files during generation)
 

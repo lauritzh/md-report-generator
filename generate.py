@@ -23,6 +23,7 @@ from string import Template
 # Constants
 content_dir = "content/"
 findings_dir = "findings/"
+output_dir = "output/"
 boilerplate_dir = "boilerplate/"
 page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>\n\n'
 
@@ -42,6 +43,7 @@ report_md += "<base href=\"file://{}/\">\n\n".format(os.getcwd())
 
 
 def init():
+	"""Initialize the report generator, load config from config.yaml"""
 	global config
 	# Parse Config
 	with open('config.yaml') as f:
@@ -50,12 +52,15 @@ def init():
 		f.close()
 
 def generate_report():
+	"""Generate the PDF report"""
+	global report_html
 	# Generate Markdown Report
 	generate_markdown_report()
 	# Generate PDF Report
-	generate_pdf_report()
+	generate_pdf_report(report_html)
 
 def generate_markdown_report():
+	"""Generate the Markdown report from the Markdown template and findings"""
 	global config, content_dir, cover_location, findings, findings_dir, report_md, report_html, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings
 
 	# Glue: Collect files and build Markdown report
@@ -134,32 +139,7 @@ def generate_markdown_report():
 	for counter,finding in enumerate(findings):
 		print("Appending finding {}...".format(finding["title"]))
 		# Fill Template
-		report_md += """
-### \#PEN{}{:04d}: {}
-
----
-
-| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vektor                                                                             |
-|---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
-| {} | [{}]({}) | {} ({})                      | *{}* |
-
----
-
-{}
-
-		""".format(
-			date.today().year,
-			counter+1,
-			finding["title"],
-			finding["asset"],
-			finding["CWE-ID"],
-			finding["CWE-Link"],
-			finding["cvss_severity"],
-			finding["cvss_score"],
-			finding["cvss_vector"],
-			finding["description"]
-		)
-		report_md += page_break
+		report_md += finding_markdown(finding, "\#PEN{}{:04d}".format(date.today().year, counter+1))
 
 	# Append Conclusion and Appendix
 	with open(content_dir + 'conclusion.md') as f:
@@ -188,7 +168,36 @@ def generate_markdown_report():
 	# Insert inlined SVG
 	report_html = report_html.replace("{piechart}", generated_piechart)
 
+def finding_markdown(finding, finding_id = "TBD"):
+	"""Generate Markdown for a single finding"""
+	temp = """
+### {}: {}
+
+---
+
+| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vektor                                                                             |
+|---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
+| {} | [{}]({}) | {} ({})                      | *{}* |
+
+---
+
+{}
+
+	""".format(
+		finding_id,
+		finding["title"],
+		finding["asset"],
+		finding["CWE-ID"],
+		finding["CWE-Link"],
+		finding["cvss_severity"],
+		finding["cvss_score"],
+		finding["cvss_vector"],
+		finding["description"]
+	)
+	return temp + page_break
+
 def process_findings():
+	"""Process all findings and generate statistics"""
 	global config, findings, findings_dir, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings
 
 	# Iterate over finding MD files, preprocess
@@ -241,10 +250,11 @@ def process_findings():
 
 
 def generate_excel_report():
-	global config, findings
+	"""Generate Excel Report"""
+	global config, findings, output_dir
 	# Write findings to Excel file
 	print("Generating Excel file...")
-	excel_report = xlsxwriter.Workbook('report.xlsx')
+	excel_report = xlsxwriter.Workbook(output_dir + 'report.xlsx')
 	excel_report_sheet = excel_report.add_worksheet("Findings")
 	bold = excel_report.add_format({'bold': True})
 	table_header = excel_report.add_format({'bold': True, 'bg_color': '#c8c8cf'})
@@ -273,8 +283,9 @@ def generate_excel_report():
 	excel_report.close()
 
 
-def generate_pdf_report():
-	global boilerplate_dir, config, cover_location, findings, report_html
+def generate_pdf_report(report_html, mode = "report", filename = "finding.md"):
+	"""Generate PDF Report from HTML"""
+	global boilerplate_dir, cover_location, output_dir
 	# Generate PDF
 	toc = {
 		'xsl-style-sheet': boilerplate_dir + 'toc.xsl'
@@ -297,10 +308,13 @@ def generate_pdf_report():
 	css = boilerplate_dir + "report.css"
 
 	print("Generating PDF...")
-	pdfkit.from_string(report_html, 'report.pdf', options=options, css=css, toc=toc, cover=cover_location, cover_first=True)
-
+	if mode == "report":
+		pdfkit.from_string(report_html, output_dir+'report.pdf', options=options, css=css, toc=toc, cover=cover_location, cover_first=True)
+	elif mode == "findings":
+		pdfkit.from_string(report_html, output_dir+filename, options=options, css=css)
 
 def all():
+	"""Generate all reports"""
 	generate_report()
 	generate_excel_report()
 
@@ -324,6 +338,16 @@ def print_findings():
 		print("CVSS Score: {}".format(finding["cvss_score"]))
 		print("")
 
+def generate_findings_reports():
+	"""Generate separate report files for all findings"""
+	global config, findings
+
+	for counter,finding in enumerate(findings):
+		print("Generating report for finding #PEN{}{:04d}...".format(date.today().year,counter+1))
+		finding_markdown_temp = finding_markdown(finding)
+		finding_html = markdown.markdown(finding_markdown_temp, extensions=['fenced_code', 'codehilite', 'tables'])
+		generate_pdf_report(finding_html, mode = "findings", filename = "finding_PEN{}{:04d}.pdf".format(date.today().year,counter+1))
+
 ################################################
 
 if __name__ == '__main__':
@@ -332,7 +356,8 @@ if __name__ == '__main__':
 	# Parse arguments
 	parser = argparse.ArgumentParser(description='Render a pentest report.')
 	parser.add_argument('--all', default=False, action='store_true', help='Generate all reports from scratch.')
-	parser.add_argument('--findings', default=False, action='store_true', help='Print all findings.')
+	parser.add_argument('--view_findings', default=False, action='store_true', help='Print all findings.')
+	parser.add_argument('--findings_only', default=False, action='store_true', help='Generate separate report files for all findings.')
 	if len(sys.argv) == 1:
 		parser.print_help(sys.stderr)
 		sys.exit(1)
@@ -341,6 +366,10 @@ if __name__ == '__main__':
 	if args.all:
 		all()
 	
-	if args.findings:
+	if args.view_findings:
 		process_findings()
 		print_findings()
+
+	if args.findings_only:
+		process_findings()
+		generate_findings_reports()
