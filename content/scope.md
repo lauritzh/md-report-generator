@@ -1,11 +1,10 @@
 ## Scope
-Lorem Ipsum dolor sit amet
 
 **Customer**     
 
-*Test Inc.*     
-*Test Street 1*     
-*12345 Test*     
+Test Inc.     
+Test Street 1     
+12345 Example City     
 
 * **Tim Customer**
 * tim@customer.com
@@ -14,9 +13,9 @@ Lorem Ipsum dolor sit amet
 
 **Service Provider**     
 
-*Lauritz Holtmann*     
-*Test Street 5*     
-*12345 Test*     
+Lauritz Holtmann     
+Südring 25     
+44787 Bochum     
 
 
 **Project Team**    

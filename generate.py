@@ -106,6 +106,9 @@ def generate_markdown_report():
 	## Set font size and padding for legend
 	plt.rcParams['font.size'] = 12
 	plt.rcParams['legend.fontsize'] = 12
+	plt.rcParams['font.family'] = 'sans-serif'
+	plt.rcParams['font.sans-serif'] = ['avenir']
+	plt.rcParams["figure.autolayout"] = True
 
 	## Create the pie chart as an SVG in memory
 	fig, ax = plt.subplots()
@@ -114,6 +117,8 @@ def generate_markdown_report():
 	### Set legend
 	plt.subplots_adjust(left=0.1, right=0.5)
 	ax.legend(labels, loc='center left', bbox_to_anchor=(1, 0.5), title='Distribution of Findings by Severity')
+	leg = ax.get_legend()
+	leg._legend_box.align = "left"
 	svg_io = io.BytesIO()
 	plt.savefig(svg_io, format='svg')
 	svg_io.seek(0)
@@ -175,7 +180,7 @@ def finding_markdown(finding, finding_id = "TBD"):
 
 ---
 
-| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vektor                                                                             |
+| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vector                                                                             |
 |---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
 | {} | [{}]({}) | {} ({})                      | *{}* |
 
@@ -299,6 +304,7 @@ def generate_pdf_report(report_html, mode = "report", filename = "finding.md"):
 		#'footer-right': '[page] of [topage]',
 		'footer-right': '[page]',
 		'footer-font-name': 'avenir next',
+		'footer-font-size': '10',
 		'margin-bottom': '1.25cm', 
 		'margin-top': '2.5cm',
 		'header-spacing': '-5',
