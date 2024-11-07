@@ -99,9 +99,13 @@ def generate_markdown_report():
 	print("Generating Pie Chart...")
 
 	## Data for the pie chart
-	labels = ['Critical', 'High', 'Medium', 'Low', 'None']
-	sizes = [critical_findings, high_findings, medium_findings, low_findings, none_findings]
-	colors = ['violet', 'red', 'orange', 'yellow', 'green']
+	# Optional: Include informational findnigs
+	#labels = ['Critical', 'High', 'Medium', 'Low', 'None']
+	#sizes = [critical_findings, high_findings, medium_findings, low_findings, none_findings]
+	#colors = ['violet', 'red', 'orange', 'yellow', 'green']
+	labels = ['Critical', 'High', 'Medium', 'Low']
+	sizes = [critical_findings, high_findings, medium_findings, low_findings]
+	colors = ['violet', 'red', 'orange', 'yellow']
 
 	## Set font size and padding for legend
 	plt.rcParams['font.size'] = 12
@@ -128,7 +132,7 @@ def generate_markdown_report():
 	generated_table_of_findings = ""
 	for counter,finding in enumerate(findings):
 		# Fill Template
-		generated_table_of_findings += "* <b style='display:inline-block;width:70px'>{}</b> \#PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
+		generated_table_of_findings += "* <b style='display:inline-block;width:100px'>{}</b> #PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
 
 	# Insert Placeholders
 	report_md = report_md.format(
@@ -144,7 +148,7 @@ def generate_markdown_report():
 	for counter,finding in enumerate(findings):
 		print("Appending finding {}...".format(finding["title"]))
 		# Fill Template
-		report_md += finding_markdown(finding, "\#PEN{}{:04d}".format(date.today().year, counter+1))
+		report_md += finding_markdown(finding, "#PEN{}{:04d}".format(date.today().year, counter+1))
 
 	# Append Conclusion and Appendix
 	with open(content_dir + 'conclusion.md') as f:
@@ -356,7 +360,7 @@ def generate_findings_reports():
 		else:
 			finding_id = "PEN{}{:04d}".format(date.today().year,counter+1)
 		print("Generating report for finding #{}...".format(finding_id))
-		finding_markdown_temp = finding_markdown(finding, finding_id)
+		finding_markdown_temp =  "<base href=\"file://{}/\">\n\n".format(os.getcwd()) + finding_markdown(finding, finding_id)
 		finding_html = markdown.markdown(finding_markdown_temp, extensions=['fenced_code', 'codehilite', 'tables'])
 		generate_pdf_report(finding_html, mode = "findings", filename = "finding_{}.pdf".format(finding_id))
 

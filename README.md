@@ -9,12 +9,22 @@ $ git clone https://github.com/lauritzh/md-report-generator.git
 
 Install dependencies:
 ```console
-$ pip3 install -r requirements.txt
+$ make init
 ```
 
-Run generation script:
+Run generation script for full report:
 ```console
-$  python3 generate.py --all
+$  make all
+```
+
+Alternatively only show findings:
+```console
+$ make view-findings
+```
+
+Or export single PDFs for each finding:
+```console
+$ make findings
 ```
 
 ## How-to

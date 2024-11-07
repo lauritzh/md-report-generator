@@ -1,8 +1,10 @@
 body{
     font-family: 'avenir next', 'avenir', sans-serif;
+    font-size: 18pt;
 }
 table {
     text-align: left;
+    font-size: 18pt;
 }
 th {
     padding-right: 25px;
