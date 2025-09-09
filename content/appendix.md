@@ -4,6 +4,7 @@ This chapter includes further supporting materials for this pentest report.
 #### Used Tools
 The following tools were used in the course of this pentest:
 
+* [Caido: A lightweight web security auditing toolkit](https://caido.io/)
 * [Burp Suite Professional: Intercepting Proxy](https://portswigger.net/burp/pro)
 * [nmap: Network Mapper](https://nmap.org/)
 * [Nikto: Web server scanner](https://cirt.net/Nikto2)

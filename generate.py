@@ -84,6 +84,7 @@ def generate_markdown_report():
 		title = config["title"], 
 		author = config["author"], 
 		customer = config["customer"],
+		vendor = config["vendor"],
 		critical_findings = "{critical_findings}",
 		high_findings = "{high_findings}",
 		medium_findings = "{medium_findings}",
@@ -167,7 +168,7 @@ def generate_markdown_report():
 
 	cover_location = "temp/cover_processed.html"
 	with open(boilerplate_dir + 'cover.html') as f:
-		cover_processed = Template(f.read()).safe_substitute(title=config["title"], author=config["author"], date=datetime.datetime.now().strftime("%Y-%m-%d"), customer=config["customer"])
+		cover_processed = Template(f.read()).safe_substitute(title=config["title"], author=config["author"], vendor=config["vendor"], date=datetime.datetime.now().strftime("%Y-%m-%d"), customer=config["customer"])
 		f.close()
 
 	with open(cover_location, 'w') as f:

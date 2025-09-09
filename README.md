@@ -14,7 +14,7 @@ $ make init
 
 Run generation script for full report:
 ```console
-$  make all
+$ make all
 ```
 
 Alternatively only show findings:

@@ -1,45 +1,95 @@
-<!DOCTYPE html>
+<!DOCTYPE html lang="en">
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>Cover Sheet</title>
     <style>
-        body {
+        html, body {
             font-family: 'avenir next', 'avenir', sans-serif;
-            padding-bottom : 30px;
+            margin: 0;
+            padding: 0;
+            color: #333;
         }
+
+        .header {
+            border-top: 10px solid #38bcf6;
+            padding: 2.5cm 2.5cm 2cm 2.5cm;
+            margin-bottom: 18.3cm;
+        }
+
         h1 {
-            padding-top: 100px;
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
             text-align: left;
+            margin: 0;
         }
+
+        h2 {
+            font-size: 1.5em;
+            font-weight: normal;
+            text-align: left;
+            color: #555;
+            margin-top: 0.5em;
+        }
+
+        .main-content {
+            border-left: 4px solid #38bcf6;
+            margin-left: 2.5cm;
+            padding-left: 2em; 
+        }
+
         table {
-            padding-top: 22cm;
-            border: none;
+            border-collapse: collapse;
+            width: 100%;
         }
+
+        td {
+            padding-bottom: 0.5em;
+            font-size: 1.1em;
+        }
+
         td:first-child {
             font-weight: bold;
+            width: 80px;
         }
+
         td:nth-child(2) {
-            padding-left: 2cm;
-            width: 400px;
+            padding-left: 1cm;
         }
+
+        .footer {
+            text-align: center;
+            padding: 1.5cm 2.5cm;
+            font-size: 0.9em;
+            color: #38bcf6;
+            border-top: 1px solid #ddd;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>Example Report</h1>
-    <h2>Demo Company</h2>
+    <header class="header">
+        <h1>Example Report</h1>
+        <h2>Demo Company</h2>
+    </header>
 
-    <table>
-        <tr>
-            <td>Author</td>
-            <td>Lauritz Holtmann</td>
-        </tr>
-        <tr>
-            <td>Date</td>
-            <td>2023-04-03</td>
-        </tr>
-    </table>
+    <main class="main-content">
+        <table>
+            <tr>
+                <td>Author</td>
+                <td>Lauritz Holtmann</td>
+            </tr>
+            <tr>
+                <td>Date</td>
+                <td>2025-09-09</td>
+            </tr>
+        </table>
+    </main>
+
+    <footer class="footer">
+       security.lauritz-holtmann.de - Confidential
+    </footer>
+
 </body>
 </html>

@@ -1,6 +1,9 @@
 body{
     font-family: 'avenir next', 'avenir', sans-serif;
     font-size: 14pt;
+    text-align: justify;     
+    text-justify: inter-word; 
+    hyphens: auto;
 }
 table {
     text-align: left;
@@ -11,6 +14,9 @@ th {
 }
 td {
     padding-right: 15px;
+}
+h2 {
+    color: #38bcf6;
 }
 h3 {
     margin-bottom: 50px;
