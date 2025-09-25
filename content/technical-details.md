@@ -9,3 +9,9 @@ During the pentest, {critical_findings} finding(s) with *critical* severity, {hi
 </div>
 
 {findings_list}
+
+### Fixed Findings
+
+The following findings have been addressed and are listed for completeness. They are excluded from statistics and charts above.
+
+{fixed_findings_list}

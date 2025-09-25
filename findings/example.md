@@ -3,6 +3,7 @@ title: XSS in Test Shop
 asset: Test Shop
 CWE-ID: CWE-79
 CWE-Link: https://cwe.mitre.org/data/definitions/79.html
+fixed: true
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: L # Attack Complexity: Low (L), High (H)

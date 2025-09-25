@@ -2,7 +2,7 @@
 #
 # A simple, self-contained report generator for penetration testing reports.
 #
-# Lauritz Holtmann, (c) 2022 - 2023
+# Lauritz Holtmann, (c) 2022 - 2025
 #
 
 import io
@@ -90,7 +90,8 @@ def generate_markdown_report():
 		medium_findings = "{medium_findings}",
 		low_findings = "{low_findings}",
 		piechart = "{piechart}",
-		findings_list = "{findings_list}"
+		findings_list = "{findings_list}",
+		fixed_findings_list = "{fixed_findings_list}"
 	)
 
 	# Process Findings
@@ -129,11 +130,19 @@ def generate_markdown_report():
 	svg_io.seek(0)
 	generated_piechart = svg_io.getvalue().decode('utf-8')
 
-	## Create the detailed table of findings
+	## Create the detailed table of findings (exclude fixed)
+	active_findings = [f for f in findings if not f.get("fixed", False)]
+	fixed_findings = [f for f in findings if f.get("fixed", False)]
+
 	generated_table_of_findings = ""
-	for counter,finding in enumerate(findings):
+	for counter,finding in enumerate(active_findings):
 		# Fill Template
 		generated_table_of_findings += "* <b style='display:inline-block;width:100px'>{}</b> #PEN{}{:04d}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
+
+	## Create list of fixed findings (titles only with IDs)
+	generated_fixed_findings = ""
+	for counter,finding in enumerate(fixed_findings):
+		generated_fixed_findings += "* <b>Fixed</b> #PEN{}{:04d}: {} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(date.today().year, counter+1, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
 
 	# Insert Placeholders
 	report_md = report_md.format(
@@ -142,11 +151,12 @@ def generate_markdown_report():
 		medium_findings = medium_findings,
 		low_findings = low_findings,
 		piechart = "{piechart}",
-		findings_list = generated_table_of_findings
+		findings_list = generated_table_of_findings,
+		fixed_findings_list = generated_fixed_findings if generated_fixed_findings != "" else "_No fixed findings._"
 	)
 
-	# Append processed findings to report
-	for counter,finding in enumerate(findings):
+	# Append processed active findings to report (exclude fixed)
+	for counter,finding in enumerate(active_findings):
 		print("Appending finding {}...".format(finding["title"]))
 		# Fill Template
 		report_md += finding_markdown(finding, "#PEN{}{:04d}".format(date.today().year, counter+1))
@@ -236,6 +246,8 @@ def process_findings():
 				finding["CWE-Link"] = properties["CWE-Link"]
 				if "finding_id" in properties:
 					finding["finding_id"] = properties["finding_id"]
+				# Optional fixed flag
+				finding["fixed"] = bool(properties.get("fixed", False))
 
 				# calculate CVSS score and severity
 				cvss_vector = "CVSS:3.1/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
@@ -253,12 +265,14 @@ def process_findings():
 		return elem["cvss_score"]
 	findings.sort(key=useScore,reverse=True)
 
-	total_findings = len(findings)
-	critical_findings = len([finding for finding in findings if finding["cvss_severity"] == "Critical"])
-	high_findings = len([finding for finding in findings if finding["cvss_severity"] == "High"])
-	medium_findings = len([finding for finding in findings if finding["cvss_severity"] == "Medium"])
-	low_findings = len([finding for finding in findings if finding["cvss_severity"] == "Low"])
-	none_findings = len([finding for finding in findings if finding["cvss_severity"] == "None"])
+	# Stats exclude fixed findings
+	active_findings = [f for f in findings if not f.get("fixed", False)]
+	total_findings = len(active_findings)
+	critical_findings = len([finding for finding in active_findings if finding["cvss_severity"] == "Critical"])
+	high_findings = len([finding for finding in active_findings if finding["cvss_severity"] == "High"])
+	medium_findings = len([finding for finding in active_findings if finding["cvss_severity"] == "Medium"])
+	low_findings = len([finding for finding in active_findings if finding["cvss_severity"] == "Low"])
+	none_findings = len([finding for finding in active_findings if finding["cvss_severity"] == "None"])
 
 
 def generate_excel_report():
@@ -271,6 +285,17 @@ def generate_excel_report():
 	bold = excel_report.add_format({'bold': True})
 	table_header = excel_report.add_format({'bold': True, 'bg_color': '#c8c8cf'})
 
+	# Formats for Fixed column
+	fixed_yes_fmt = excel_report.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#2e7d32', 'align': 'center'})  # green
+	fixed_no_fmt = excel_report.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#c62828', 'align': 'center'})   # red
+
+	# Formats for Severity column
+	sev_crit_fmt = excel_report.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#7b1fa2'})  # violet
+	sev_high_fmt = excel_report.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#d32f2f'})  # red
+	sev_med_fmt  = excel_report.add_format({'bold': True, 'font_color': 'black', 'bg_color': '#f9a825'})  # orange/yellow
+	sev_low_fmt  = excel_report.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#fff59d'})  # light yellow
+	sev_none_fmt = excel_report.add_format({'bold': False, 'font_color': 'black', 'bg_color': '#c8e6c9'})  # light green
+
 	# Title
 	excel_report_sheet.write(0, 0, "Pentest Report: {}".format(config["title"]), bold)
 	excel_report_sheet.write(1, 0, "Author: {}".format(config["author"]))
@@ -278,18 +303,49 @@ def generate_excel_report():
 
 	# Table Header
 	excel_report_sheet.write(4, 0, "Finding-ID", table_header)
-	excel_report_sheet.write(4, 1, "Severity", table_header)
-	excel_report_sheet.write(4, 2, "Asset", table_header)
-	excel_report_sheet.write(4, 3, "Title", table_header)
+	excel_report_sheet.write(4, 1, "Fixed", table_header)
+	excel_report_sheet.write(4, 2, "Severity", table_header)
+	excel_report_sheet.write(4, 3, "Asset", table_header)
+	excel_report_sheet.write(4, 4, "Title", table_header)
+
+	# Column widths
+	excel_report_sheet.set_column(0, 0, 16)  # Finding-ID
+	excel_report_sheet.set_column(1, 1, 8)   # Fixed
+	excel_report_sheet.set_column(2, 2, 20)  # Severity
+	excel_report_sheet.set_column(3, 3, 20)  # Asset
+	excel_report_sheet.set_column(4, 4, 60)  # Title
 
 	# Findings
 	row = 5
 	col = 0 
 	for counter,finding in enumerate(findings):
+		# ID
 		excel_report_sheet.write(row, col, "#PEN{}{:04d}".format(date.today().year,counter+1), bold)
-		excel_report_sheet.write(row, col + 1, "{} ({})".format(finding["cvss_severity"], finding["cvss_score"]))
-		excel_report_sheet.write(row, col + 2, finding["asset"])
-		excel_report_sheet.write(row, col + 3, finding["title"])
+
+		# Fixed with color
+		is_fixed = bool(finding.get("fixed", False))
+		fixed_text = "Yes" if is_fixed else "No"
+		fixed_fmt = fixed_yes_fmt if is_fixed else fixed_no_fmt
+		excel_report_sheet.write(row, col + 1, fixed_text, fixed_fmt)
+
+		# Severity with color
+		sev = finding["cvss_severity"]
+		sev_fmt = {
+			"Critical": sev_crit_fmt,
+			"High": sev_high_fmt,
+			"Medium": sev_med_fmt,
+			"Low": sev_low_fmt,
+			"None": sev_none_fmt
+		}.get(sev, None)
+		sev_text = "{} ({})".format(sev, finding["cvss_score"])
+		if sev_fmt:
+			excel_report_sheet.write(row, col + 2, sev_text, sev_fmt)
+		else:
+			excel_report_sheet.write(row, col + 2, sev_text)
+
+		# Asset and Title
+		excel_report_sheet.write(row, col + 3, finding["asset"])
+		excel_report_sheet.write(row, col + 4, finding["title"])
 		row += 1
 
 	excel_report.close()
