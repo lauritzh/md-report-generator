@@ -69,6 +69,11 @@ def generate_markdown_report():
 		report_md += page_break
 		f.close()
 
+	with open(content_dir + 'history.md') as f:
+		report_md += f.read()
+		report_md += page_break
+		f.close()
+
 	with open(content_dir + 'scope.md') as f:
 		report_md += f.read()
 		report_md += page_break
