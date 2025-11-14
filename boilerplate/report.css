@@ -1,13 +1,13 @@
 body{
     font-family: 'avenir next', 'avenir', sans-serif;
-    font-size: 12pt;
+    font-size: 18pt;
     text-align: justify;     
     text-justify: inter-word; 
     hyphens: auto;
 }
 table {
     text-align: left;
-    font-size: 12pt;
+    font-size: 16pt;
 }
 th {
     padding-right: 25px;
@@ -37,6 +37,26 @@ img {
 pre { 
     line-height: 125%; 
     border-color: gray;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+.codehilite {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+code {
+    white-space: pre-wrap;
+    font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+}
+:not(pre) > code {
+    background-color: #f5f5f5;
+    border: 1px solid #d0d0d0;
+    border-radius: 3px;
+    padding: 0 4px;
+    font-size: 90%;
+    color: #1b6fb0;
 }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
 span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
