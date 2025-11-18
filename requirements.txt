@@ -6,3 +6,4 @@ pygments
 xlsxwriter
 matplotlib
 argparse
+python-docx

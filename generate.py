@@ -19,6 +19,11 @@ import matplotlib.pyplot as plt
 from cvss import CVSS3
 from datetime import date
 from string import Template
+from docx import Document
+from docx.shared import Pt
+from docx.enum.style import WD_STYLE_TYPE
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 # Constants
 content_dir = "content/"
@@ -68,6 +73,101 @@ def display_finding_id(finding, counter):
 	finding_id = resolve_finding_id(finding, counter)
 	return finding_id if finding_id.startswith("#") else "#{}".format(finding_id)
 
+def markdown_links_to_text(text):
+	"""Convert Markdown inline links to plain text with URL in parentheses."""
+	if not text:
+		return ""
+	link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+	return link_pattern.sub(lambda m: "{} ({})".format(m.group(1).strip(), m.group(2).strip()), text)
+
+def ensure_code_block_style(document):
+	"""Ensure a dedicated code-block style exists and return it."""
+	style_name = "CodeBlock"
+	try:
+		return document.styles[style_name]
+	except KeyError:
+		style = document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+		style.font.name = "Courier New"
+		style.font.size = Pt(10)
+		style.paragraph_format.left_indent = Pt(12)
+		style.paragraph_format.space_before = Pt(6)
+		style.paragraph_format.space_after = Pt(6)
+		return style
+
+def apply_code_block_shading(paragraph, fill="F2F2F2"):
+	"""Apply a soft gray background to a paragraph to mimic code block styling."""
+	ppr = paragraph._p.get_or_add_pPr()
+	shading = OxmlElement('w:shd')
+	shading.set(qn('w:val'), 'clear')
+	shading.set(qn('w:color'), 'auto')
+	shading.set(qn('w:fill'), fill)
+	ppr.append(shading)
+
+def add_code_block_paragraph(document, lines):
+	"""Insert a formatted code block paragraph into the document."""
+	if not lines:
+		return
+	style = ensure_code_block_style(document)
+	paragraph = document.add_paragraph(style=style)
+	paragraph.alignment = None
+	run = paragraph.add_run("\n".join(lines))
+	run.font.name = "Courier New"
+	run.font.size = Pt(10)
+	apply_code_block_shading(paragraph)
+
+def add_markdown_content_to_doc(document, markdown_text):
+	"""Render a limited subset of Markdown to the Word document."""
+	if not markdown_text:
+		return
+
+	lines = markdown_text.strip().splitlines()
+	in_code_block = False
+	code_lines = []
+
+	for raw_line in lines:
+		line = raw_line.rstrip("\n")
+		stripped = line.strip()
+
+		if stripped.startswith("```"):
+			if in_code_block:
+				add_code_block_paragraph(document, code_lines)
+				code_lines = []
+				in_code_block = False
+			else:
+				in_code_block = True
+			continue
+
+		if in_code_block:
+			code_lines.append(line)
+			continue
+
+		if not stripped:
+			document.add_paragraph("")
+			continue
+
+		if stripped.startswith("#"):
+			level = len(stripped) - len(stripped.lstrip("#"))
+			heading_text = stripped[level:].strip()
+			if heading_text:
+				heading_level = max(1, min(level, 4))
+				document.add_heading(markdown_links_to_text(heading_text), level=heading_level)
+			continue
+
+		bullet_prefix = None
+		for prefix in ("* ", "- ", "• ", "● "):
+			if stripped.startswith(prefix):
+				bullet_prefix = prefix
+				break
+
+		if bullet_prefix is not None:
+			bullet_text = stripped[len(bullet_prefix):].strip()
+			document.add_paragraph(markdown_links_to_text(bullet_text), style='List Bullet')
+			continue
+
+		document.add_paragraph(markdown_links_to_text(line))
+
+	if in_code_block and code_lines:
+		add_code_block_paragraph(document, code_lines)
 
 def init():
 	"""Initialize the report generator, load config from config.yaml"""
@@ -398,6 +498,60 @@ def generate_excel_report():
 
 	excel_report.close()
 
+def generate_word_report():
+	"""Generate a Word document containing the sorted findings."""
+	global config, findings, output_dir
+
+	if not findings:
+		process_findings()
+
+	document = Document()
+
+	active_findings = [f for f in findings if not f.get("fixed", False)]
+
+	for idx, finding in enumerate(active_findings):
+		display_id = finding.get("_display_id", display_finding_id(finding, idx))
+		document.add_heading("{} {}".format(display_id, finding["title"]), level=1)
+
+		cvss_score = finding["cvss_score"]
+		if isinstance(cvss_score, (int, float)):
+			cvss_score_text = "{:.1f}".format(cvss_score)
+		else:
+			cvss_score_text = str(cvss_score)
+
+		document.add_paragraph("{}\t{} ({})".format(finding["cvss_vector"], finding["cvss_severity"], cvss_score_text))
+
+		table_rows = [
+			("Asset", finding["asset"]),
+			("CWE", "CWE-{} ({})".format(finding["CWE-ID"], finding["CWE-Link"])),
+			("Status", "Fixed" if finding.get("fixed", False) else "Open"),
+			("Severity", "{} ({})".format(finding["cvss_severity"], cvss_score_text)),
+			("CVSS Vector", finding["cvss_vector"])
+		]
+
+		table = document.add_table(rows=len(table_rows), cols=2)
+		try:
+			table.style = "Light List Accent 1"
+		except KeyError:
+			pass
+
+		for row_idx, (label, value) in enumerate(table_rows):
+			table.rows[row_idx].cells[0].text = label
+			table.rows[row_idx].cells[1].text = str(value)
+
+		document.add_paragraph("")
+		add_markdown_content_to_doc(document, finding["description"].strip())
+
+		if idx < len(active_findings) - 1:
+			document.add_page_break()
+
+	if not active_findings:
+		document.add_paragraph("No active findings available.")
+
+	output_path = os.path.join(output_dir, "findings.docx")
+	document.save(output_path)
+	print("Word report written to {}".format(output_path))
+
 
 def generate_pdf_report(report_html, mode = "report", filename = "finding.md"):
 	"""Generate PDF Report from HTML"""
@@ -479,6 +633,7 @@ if __name__ == '__main__':
 	parser.add_argument('--all', default=False, action='store_true', help='Generate all reports from scratch.')
 	parser.add_argument('--view_findings', default=False, action='store_true', help='Print all findings.')
 	parser.add_argument('--findings_only', default=False, action='store_true', help='Generate separate report files for all findings.')
+	parser.add_argument('--word', default=False, action='store_true', help='Export the sorted findings to a Word document.')
 	if len(sys.argv) == 1:
 		parser.print_help(sys.stderr)
 		sys.exit(1)
@@ -494,3 +649,6 @@ if __name__ == '__main__':
 	if args.findings_only:
 		process_findings()
 		generate_findings_reports()
+
+	if args.word:
+		generate_word_report()

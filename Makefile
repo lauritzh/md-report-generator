@@ -1,4 +1,4 @@
-.PHONY: init all findings view-findings
+.PHONY: init all findings view-findings word
 
 init:
 	python3 -m venv venv
@@ -12,3 +12,6 @@ findings:
 
 view-findings:
 	./run_in_venv.sh python3 generate.py --view_findings
+
+word:
+	./run_in_venv.sh python3 generate.py --word
