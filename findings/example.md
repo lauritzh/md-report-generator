@@ -7,12 +7,15 @@ fixed: true
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: L # Attack Complexity: Low (L), High (H)
+    AT: N # Attack Requirements: None (N), Present (P)
     PR: N # Privileges Required: None (N), Low (L), High (H)
-    UI: R # User Interaction: None (N), Required (R)
-    S: U # Unchanged (U), Changed (C)
-    C: H # Confidentiality: High (H), Low (L), None (N)
-    I: L # Integrity: High (H), Low (L), None (N)
-    A: N # Availability: High (H), Low (L), None (N)
+    UI: A # User Interaction: None (N), Passive (P), Active (A)
+    VC: H # Vulnerable System Confidentiality: High (H), Low (L), None (N)
+    VI: L # Vulnerable System Integrity: High (H), Low (L), None (N)
+    VA: N # Vulnerable System Availability: High (H), Low (L), None (N)
+    SC: N # Subsequent System Confidentiality: High (H), Low (L), None (N)
+    SI: N # Subsequent System Integrity: High (H), Low (L), None (N)
+    SA: N # Subsequent System Availability: High (H), Low (L), None (N)
 -->
 #### Description
 A *Cross-Site Scripting* vulnerability has been identified.

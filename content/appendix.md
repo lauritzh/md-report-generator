@@ -23,7 +23,7 @@ Further, pentests of single sign-on (*SSO*) solutions are performed based on bes
 
 ##### Severity Classification
 
-All identified findings are classified according to the Common Vulnerability Scoring System (*CVSS v3.1*). CVSS provides a standardized method to evaluate the technical impact and exploitability of a vulnerability. Scores range from **0.0 to 10.0** and map to the following severity categories:
+All identified findings are classified according to the Common Vulnerability Scoring System (*CVSS v4.0*). CVSS provides a standardized method to evaluate the technical impact and exploitability of a vulnerability. Scores range from **0.0 to 10.0** and map to the following severity categories:
 
 | Severity Level | CVSS Score Range | Description |
 |----------------|------------------|-------------|

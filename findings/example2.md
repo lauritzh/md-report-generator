@@ -6,12 +6,15 @@ CWE-Link: https://cwe.mitre.org/data/definitions/611.html
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: L # Attack Complexity: Low (L), High (H)
+    AT: N # Attack Requirements: None (N), Present (P)
     PR: N # Privileges Required: None (N), Low (L), High (H)
-    UI: N # User Interaction: None (N), Required (R)
-    S: U # Unchanged (U), Changed (C)
-    C: H # Confidentiality: High (H), Low (L), None (N)
-    I: H # Integrity: High (H), Low (L), None (N)
-    A: N # Availability: High (H), Low (L), None (N)
+    UI: N # User Interaction: None (N), Passive (P), Active (A)
+    VC: H # Vulnerable System Confidentiality: High (H), Low (L), None (N)
+    VI: H # Vulnerable System Integrity: High (H), Low (L), None (N)
+    VA: N # Vulnerable System Availability: High (H), Low (L), None (N)
+    SC: N # Subsequent System Confidentiality: High (H), Low (L), None (N)
+    SI: N # Subsequent System Integrity: High (H), Low (L), None (N)
+    SA: N # Subsequent System Availability: High (H), Low (L), None (N)
 -->
 #### Description
 This type of vulnerability arises, if an application processes XML and is configured to support external entities.

@@ -16,7 +16,7 @@ import datetime
 import markdown
 import xlsxwriter
 import matplotlib.pyplot as plt
-from cvss import CVSS3
+from cvss import CVSS4
 from datetime import date
 from string import Template
 from docx import Document
@@ -31,6 +31,8 @@ findings_dir = "findings/"
 output_dir = "output/"
 boilerplate_dir = "boilerplate/"
 page_break = '\n\n<div style = "display:block; clear:both; page-break-after:always;"></div>\n\n'
+cvss_version = "4.0"
+cvss_base_metrics = ["AV", "AC", "AT", "PR", "UI", "VC", "VI", "VA", "SC", "SI", "SA"]
 
 # Global Variables
 config = {}
@@ -72,6 +74,36 @@ def display_finding_id(finding, counter):
 	"""Return a display-friendly finding id (prefixed with # if needed)."""
 	finding_id = resolve_finding_id(finding, counter)
 	return finding_id if finding_id.startswith("#") else "#{}".format(finding_id)
+
+def build_cvss4_vector(cvss_config):
+	"""Create a normalized CVSS 4.0 vector from either a dict of metrics or a raw vector."""
+	if not isinstance(cvss_config, dict):
+		raise ValueError("CVSS configuration must be a mapping")
+
+	vector_value = cvss_config.get("vector")
+	if vector_value:
+		vector = str(vector_value).strip()
+		if not vector:
+			raise ValueError("Provided CVSS vector is empty")
+		vector_body = vector
+		if vector_body.startswith("CVSS:"):
+			vector_body = vector_body.split("/", 1)[1] if "/" in vector_body else ""
+		vector_body = vector_body.lstrip("/")
+		if not vector_body:
+			raise ValueError("Provided CVSS vector is incomplete")
+		return "CVSS:{}/{}".format(cvss_version, vector_body)
+
+	missing = [metric for metric in cvss_base_metrics if metric not in cvss_config]
+	if missing:
+		raise ValueError("Missing CVSS metrics: {}".format(", ".join(missing)))
+
+	def format_metric(metric):
+		value = str(cvss_config[metric]).strip().upper()
+		if not value:
+			raise ValueError("Empty value for metric {}".format(metric))
+		return "{}:{}".format(metric, value)
+
+	return "CVSS:{}/{}".format(cvss_version, "/".join(format_metric(m) for m in cvss_base_metrics))
 
 def markdown_links_to_text(text):
 	"""Convert Markdown inline links to plain text with URL in parentheses."""
@@ -334,7 +366,7 @@ def finding_markdown(finding, finding_id = "TBD"):
 
 ---
 
-| Asset         | CWE                                                      | Status | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vector                                                                             |
+| Asset         | CWE                                                      | Status | Severity | CVSS v{cvss_version} Vector                                                                             |
 |---------------|----------------------------------------------------------|--------|---------------------------------|----------------------------------------------------------------------------------------------|
 | {} | [{}]({}) | **{}** | {} ({})                      | *{}* |
 
@@ -353,7 +385,8 @@ def finding_markdown(finding, finding_id = "TBD"):
 		finding["cvss_severity"],
 		finding["cvss_score"],
 		finding["cvss_vector"],
-		finding["description"]
+		finding["description"],
+		cvss_version=cvss_version
 	)
 	return temp + page_break
 
@@ -391,8 +424,12 @@ def process_findings():
 				finding["fixed"] = bool(properties.get("fixed", False))
 
 				# calculate CVSS score and severity
-				cvss_vector = "CVSS:3.1/AV:{}/AC:{}/PR:{}/UI:{}/S:{}/C:{}/I:{}/A:{}".format(properties["cvss"]["AV"], properties["cvss"]["AC"], properties["cvss"]["PR"], properties["cvss"]["UI"], properties["cvss"]["S"], properties["cvss"]["C"], properties["cvss"]["I"],properties["cvss"]["A"])
-				c = CVSS3(cvss_vector)
+				try:
+					cvss_vector = build_cvss4_vector(properties["cvss"])
+				except Exception as exc:
+					raise ValueError("Invalid CVSS configuration in {}: {}".format(filename, exc)) from exc
+
+				c = CVSS4(cvss_vector)
 				finding["cvss_vector"] = c.clean_vector()
 				finding["cvss_score"] = c.scores()[0]
 				finding["cvss_severity"] = c.severities()[0]

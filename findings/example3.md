@@ -7,12 +7,15 @@ finding_id: PEN20250003
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: H # Attack Complexity: Low (L), High (H)
-    PR: N # Privileges Required: None (N), Low (L), High (H)
-    UI: R # User Interaction: None (N), Required (R)
-    S: U # Unchanged (U), Changed (C)
-    C: N # Confidentiality: High (H), Low (L), None (N)
-    I: L # Integrity: High (H), Low (L), None (N)
-    A: N # Availability: High (H), Low (L), None (N)
+    AT: P # Attack Requirements: None (N), Present (P)
+    PR: H # Privileges Required: None (N), Low (L), High (H)
+    UI: A # User Interaction: None (N), Passive (P), Active (A)
+    VC: H # Vulnerable System Confidentiality: High (H), Low (L), None (N)
+    VI: N # Vulnerable System Integrity: High (H), Low (L), None (N)
+    VA: N # Vulnerable System Availability: High (H), Low (L), None (N)
+    SC: N # Subsequent System Confidentiality: High (H), Low (L), None (N)
+    SI: N # Subsequent System Integrity: High (H), Low (L), None (N)
+    SA: N # Subsequent System Availability: High (H), Low (L), None (N)
 -->
 #### Description
 This type if vulnerability arises, if an application redirects to untrusted URLs.
