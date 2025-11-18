@@ -2,7 +2,7 @@
 
 In this section, all identified vulnerabilities are described in detail.
 
-During the pentest, {critical_findings} finding(s) with *critical* severity, {high_findings} finding(s) with *high* severity, {medium_findings} finding(s) with *medium* severity and {low_findings} finding(s) with *low* severity were identified.
+After completion of the pentest, {critical_findings} finding(s) with *critical* severity, {high_findings} finding(s) with *high* severity, {medium_findings} finding(s) with *medium* severity and {low_findings} finding(s) with *low* severity remain open.
 
 <div style="text-align:center;">
 {piechart}
@@ -10,8 +10,7 @@ During the pentest, {critical_findings} finding(s) with *critical* severity, {hi
 
 {findings_list}
 
-### Fixed Findings
 
-The following findings have been addressed and are listed for completeness. They are excluded from statistics and charts above.
+The following findings were identified and already addressed during the pentest period. They are listed for completeness and are excluded from the statistics and charts above, as they do not require further action but are documented here for transparency.
 
 {fixed_findings_list}

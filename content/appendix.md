@@ -21,6 +21,21 @@ The following tools were used in the course of this pentest:
 This penetration test was performed based on industry standards such as the *OWASP Web Security Testing Guide* and the *OWASP Top 10*. The *OWASP Top 10* is regularly updated and covers the most common and relevant threats for web applications. Pentests of mobile applications are additionally performed based on the *OWASP Mobile Security Testing Guide*. 
 Further, pentests of single sign-on (*SSO*) solutions are performed based on best practices such as the *OAuth 2.0 Security Best Current Practice* as well as current research.
 
+##### Severity Classification
+
+All identified findings are classified according to the Common Vulnerability Scoring System (*CVSS v3.1*). CVSS provides a standardized method to evaluate the technical impact and exploitability of a vulnerability. Scores range from **0.0 to 10.0** and map to the following severity categories:
+
+| Severity Level | CVSS Score Range | Description |
+|----------------|------------------|-------------|
+| **None**       | 0.0              | No direct security impact. However, the condition may still support an attack chain when combined with other weaknesses. |
+| **Low**        | 0.1 – 3.9        | Limited impact on systems or users. Exploitation typically requires specific circumstances or offers minimal gain to an attacker. |
+| **Medium**     | 4.0 – 6.9        | Noticeable impact on confidentiality, integrity, or availability. Attackers may exploit the issue with moderate effort or preconditions. |
+| **High**       | 7.0 – 8.9        | Serious security implications. Exploitation is feasible and may significantly affect data or system operations. |
+| **Critical**   | 9.0 – 10.0       | Severe risk requiring immediate attention. Vulnerabilities in this range are typically easy to exploit or result in major compromise of systems or data. |
+
+Using CVSS ensures consistent prioritization of remediation efforts. Each finding in this report includes its CVSS score, an explanation of the underlying issue, the potential impact, and actionable remediation recommendations.
+
+
 ##### Timeline of a pentest 
 A typical timeline of a pentest execution could look as follows:
 

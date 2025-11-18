@@ -39,7 +39,21 @@ total_findings = critical_findings = high_findings = medium_findings = low_findi
 
 # Set Base-URL to current working directory 
 # Makes including images to report more easy by simply referencing images/test.png
-report_md += "<base href=\"file://{}/\">\n\n".format(os.getcwd())
+base_href = "file://{}/".format(os.getcwd())
+
+def wrap_html_document(body_html, base_href=None):
+	"""Wrap bare HTML fragments with a minimal document structure and base tag."""
+	base_tag = '<base href="{}">'.format(base_href) if base_href else ''
+	return """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+{}
+</head>
+<body>
+{}
+</body>
+</html>""".format(base_tag, body_html)
 
 def resolve_finding_id(finding, counter):
 	"""Return canonical identifier for a finding, honoring metadata overrides."""
@@ -74,7 +88,7 @@ def generate_report():
 
 def generate_markdown_report():
 	"""Generate the Markdown report from the Markdown template and findings"""
-	global config, content_dir, cover_location, findings, findings_dir, report_md, report_html, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings
+	global config, content_dir, cover_location, findings, findings_dir, report_md, report_html, total_findings, critical_findings, high_findings, medium_findings, low_findings, none_findings, base_href
 
 	# Glue: Collect files and build Markdown report
 	with open(content_dir + 'introduction.md') as f:
@@ -154,14 +168,14 @@ def generate_markdown_report():
 
 	generated_table_of_findings = ""
 	for counter,finding in enumerate(active_findings):
-		finding_id = display_finding_id(finding, counter)
+		finding_id = finding.get("_display_id", display_finding_id(finding, counter))
 		# Fill Template
 		generated_table_of_findings += "* <b style='display:inline-block;width:100px'>{}</b> {}:\t{} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding["cvss_severity"], finding_id, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
 
 	## Create list of fixed findings (titles only with IDs)
 	generated_fixed_findings = ""
 	for counter,finding in enumerate(fixed_findings):
-		finding_id = display_finding_id(finding, counter)
+		finding_id = finding.get("_display_id", display_finding_id(finding, counter))
 		generated_fixed_findings += "* <b>Fixed</b> {}: {} ([CWE-{}](https://cwe.mitre.org/data/definitions/{}.html))\n".format(finding_id, finding["title"], finding["CWE-ID"], finding["CWE-ID"])
 
 	# Insert Placeholders
@@ -175,11 +189,11 @@ def generate_markdown_report():
 		fixed_findings_list = generated_fixed_findings if generated_fixed_findings != "" else "_No fixed findings._"
 	)
 
-	# Append processed active findings to report (exclude fixed)
-	for counter,finding in enumerate(active_findings):
+	# Append processed findings (including fixed) to report
+	for counter,finding in enumerate(findings):
 		print("Appending finding {}...".format(finding["title"]))
 		# Fill Template
-		finding_id = display_finding_id(finding, counter)
+		finding_id = finding.get("_display_id", display_finding_id(finding, counter))
 		report_md += finding_markdown(finding, finding_id)
 
 	# Append Conclusion and Appendix
@@ -208,17 +222,21 @@ def generate_markdown_report():
 
 	# Insert inlined SVG
 	report_html = report_html.replace("{piechart}", generated_piechart)
+	report_html = wrap_html_document(report_html, base_href)
 
 def finding_markdown(finding, finding_id = "TBD"):
 	"""Generate Markdown for a single finding"""
+	is_fixed = finding.get("fixed", False)
+	status_label = "Fixed" if is_fixed else "Open"
+	title_suffix = " (Fixed)" if is_fixed else ""
 	temp = """
-### {}: {}
+### {}: {}{}
 
 ---
 
-| Asset         | CWE                                                      | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vector                                                                             |
-|---------------|----------------------------------------------------------|---------------------------------|----------------------------------------------------------------------------------------------|
-| {} | [{}]({}) | {} ({})                      | *{}* |
+| Asset         | CWE                                                      | Status | Severity (CVSS v3.1 Base Score) | CVSS v3.1 Vector                                                                             |
+|---------------|----------------------------------------------------------|--------|---------------------------------|----------------------------------------------------------------------------------------------|
+| {} | [{}]({}) | **{}** | {} ({})                      | *{}* |
 
 ---
 
@@ -227,9 +245,11 @@ def finding_markdown(finding, finding_id = "TBD"):
 	""".format(
 		finding_id,
 		finding["title"],
+		title_suffix,
 		finding["asset"],
 		finding["CWE-ID"],
 		finding["CWE-Link"],
+		status_label,
 		finding["cvss_severity"],
 		finding["cvss_score"],
 		finding["cvss_vector"],
@@ -285,6 +305,13 @@ def process_findings():
 	def useScore(elem):
 		return elem["cvss_score"]
 	findings.sort(key=useScore,reverse=True)
+
+	# Precompute resolved/display IDs for consistent reuse
+	for idx, finding in enumerate(findings):
+		resolved = resolve_finding_id(finding, idx)
+		display_id = resolved if resolved.startswith("#") else "#{}".format(resolved)
+		finding["_resolved_id"] = resolved
+		finding["_display_id"] = display_id
 
 	# Stats exclude fixed findings
 	active_findings = [f for f in findings if not f.get("fixed", False)]
@@ -430,14 +457,15 @@ def print_findings():
 
 def generate_findings_reports():
 	"""Generate separate report files for all findings"""
-	global config, findings
+	global config, findings, base_href
 
 	for counter,finding in enumerate(findings):
-		raw_finding_id = resolve_finding_id(finding, counter)
-		display_id = display_finding_id(finding, counter)
+		raw_finding_id = finding.get("_resolved_id", resolve_finding_id(finding, counter))
+		display_id = finding.get("_display_id", display_finding_id(finding, counter))
 		print("Generating report for finding {}...".format(display_id))
-		finding_markdown_temp =  "<base href=\"file://{}/\">\n\n".format(os.getcwd()) + finding_markdown(finding, display_id)
+		finding_markdown_temp = finding_markdown(finding, display_id)
 		finding_html = markdown.markdown(finding_markdown_temp, extensions=['fenced_code', 'codehilite', 'tables'])
+		finding_html = wrap_html_document(finding_html, base_href)
 		filename_id = raw_finding_id[1:] if raw_finding_id.startswith("#") else raw_finding_id
 		generate_pdf_report(finding_html, mode = "findings", filename = "finding_{}.pdf".format(filename_id))
 
