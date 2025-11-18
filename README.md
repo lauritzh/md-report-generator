@@ -62,6 +62,7 @@ cvss:
     SC: N # Subsequent System Confidentiality: High (H), Low (L), None (N)
     SI: N # Subsequent System Integrity: High (H), Low (L), None (N)
     SA: N # Subsequent System Availability: High (H), Low (L), None (N)
+comment: "Optional analyst notes that appear in the Excel export"
 -->
 Lorem Ipsum dolor sit amet...
 [...]

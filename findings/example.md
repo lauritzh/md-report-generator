@@ -4,6 +4,7 @@ asset: Test Shop
 CWE-ID: CWE-79
 CWE-Link: https://cwe.mitre.org/data/definitions/79.html
 fixed: true
+comment: The xyz parameter is not correctly encoded and/or filtered before being embedded within the application.
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: L # Attack Complexity: Low (L), High (H)

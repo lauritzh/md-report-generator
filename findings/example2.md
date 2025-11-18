@@ -3,6 +3,7 @@ title: XXE in Test Shop
 asset: Test Shop
 CWE-ID: CWE-611
 CWE-Link: https://cwe.mitre.org/data/definitions/611.html
+comment: The API processes external entities that are included within the request body.
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)
     AC: L # Attack Complexity: Low (L), High (H)

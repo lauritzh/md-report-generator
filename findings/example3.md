@@ -3,6 +3,7 @@ title: Open Redirect in Test Shop
 asset: Test Shop
 CWE-ID: CWE-601
 CWE-Link: https://cwe.mitre.org/data/definitions/601.html
+comment: The to parameter is used to redirect the end-user without sufficient validation.
 finding_id: PEN20250003
 cvss:
     AV: N # Attack Vector: Network (N), Adjacent (A), Local (L), Physical (P)

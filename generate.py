@@ -422,6 +422,8 @@ def process_findings():
 					finding["finding_id"] = properties["finding_id"]
 				# Optional fixed flag
 				finding["fixed"] = bool(properties.get("fixed", False))
+				# Optional analyst comment
+				finding["comment"] = str(properties.get("comment", "")).strip()
 
 				# calculate CVSS score and severity
 				try:
@@ -492,13 +494,17 @@ def generate_excel_report():
 	excel_report_sheet.write(4, 2, "Severity", table_header)
 	excel_report_sheet.write(4, 3, "Asset", table_header)
 	excel_report_sheet.write(4, 4, "Title", table_header)
+	excel_report_sheet.write(4, 5, "CVSS v{} Vector".format(cvss_version), table_header)
+	excel_report_sheet.write(4, 6, "Comment", table_header)
 
 	# Column widths
 	excel_report_sheet.set_column(0, 0, 16)  # Finding-ID
 	excel_report_sheet.set_column(1, 1, 8)   # Fixed
 	excel_report_sheet.set_column(2, 2, 20)  # Severity
 	excel_report_sheet.set_column(3, 3, 20)  # Asset
-	excel_report_sheet.set_column(4, 4, 60)  # Title
+	excel_report_sheet.set_column(4, 4, 40)  # Title
+	excel_report_sheet.set_column(5, 5, 45)  # CVSS Vector
+	excel_report_sheet.set_column(6, 6, 35)  # Comment
 
 	# Findings
 	row = 5
@@ -528,9 +534,11 @@ def generate_excel_report():
 		else:
 			excel_report_sheet.write(row, col + 2, sev_text)
 
-		# Asset and Title
+		# Asset, Title, CVSS vector, Comment
 		excel_report_sheet.write(row, col + 3, finding["asset"])
 		excel_report_sheet.write(row, col + 4, finding["title"])
+		excel_report_sheet.write(row, col + 5, finding.get("cvss_vector", ""))
+		excel_report_sheet.write(row, col + 6, finding.get("comment", ""))
 		row += 1
 
 	excel_report.close()
